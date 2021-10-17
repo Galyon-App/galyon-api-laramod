@@ -209,7 +209,7 @@ class Setting extends AppCore
 
     protected function getInitObject() {
         $lang_file = 'en.json';
-        $lang_json  = json_decode(file_get_contents(APPPATH.'/language/english/'.$lang_file));
+        $lang_json  = json_decode(file_get_contents(APPPATH.'Language/english/'.$lang_file));
         $popups = $this->Crud_model->sql_get('popups', 'uuid, message, timestamp', array( "shown" => "1", "status" => "1" ), null, 'result' );
 
         return array(
