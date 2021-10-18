@@ -95,3 +95,7 @@ $routes->group('galyon', ['namespace' => 'Galyon\Controllers'], function ($route
 $routes->group('uploads', ['namespace' => 'Galyon\Controllers'], function ($routes) {
     $routes->get('(:any)', 'Image::render/$1');
 });
+
+$routes->group('users', ['namespace' => 'Galyon\Controllers'], function ($routes) {
+    $routes->post('upload_image', 'Image::upload');
+});

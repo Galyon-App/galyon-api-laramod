@@ -45,4 +45,19 @@ class Image extends AppCore
             ->setBody($image)
             ->send();
     }
+
+    public function upload()
+    {
+        $auth = $this->is_authorized(); //exit if not auth.
+
+        if($file = $this->request->getFile('userfile')) {
+            if ($file->isValid() && !$file->hasMoved()) {
+                $newName = $file->getRandomName();
+                $file->move(WRITEPATH.'uploads', $newName);
+                $this->json_response($newName);
+            }
+        } else {
+            $this->json_response(null, false, "You are not authorized to upload a file.");
+        }
+    }
 }
