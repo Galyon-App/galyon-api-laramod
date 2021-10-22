@@ -110,7 +110,7 @@ class User extends AppCore
             $html_message = str_replace('{FULLNAME}', $fullname, $html_message);
 
             $is_sent = $this->send_mail($email, "Verify Account", $html_message);
-            if($is_sent["success"]) {
+            if($is_sent) {
                 $new_user = $this->Crud_model->sql_get($this->table_name, $this->public_column, array( "id" => $inserted ), null, 'row' );
                 unset($new_user->password);
                 unset($new_user->activation_key);
@@ -147,7 +147,7 @@ class User extends AppCore
                 $html_message = str_replace('{FULLNAME}', $user->first_name." ".$user->last_name, $html_message);
 
                 $is_sent = $this->send_mail($email, "Account Activation", $html_message);
-                if($is_sent["success"]) {
+                if($is_sent) {
                     $this->json_response(null);
                 } else {
                     $this->json_response(null, false, "Failed sending email, contact us!");
