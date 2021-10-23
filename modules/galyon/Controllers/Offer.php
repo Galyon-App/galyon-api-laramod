@@ -7,7 +7,7 @@ use Galyon\Controllers\AppCore;
 class Offer extends AppCore
 {
     private $table_name = 'offers';
-    private $public_column = ['uuid','name','descriptions','image','type','off','min','upto','status','timestamp','updated_at','deleted_at'];
+    private $public_column = ['uuid','name','descriptions','image','type','off','min','upto','status','expired_at','timestamp','updated_at','deleted_at'];
     private $required = ['uuid'];
 
     function __construct(){
@@ -128,7 +128,7 @@ class Offer extends AppCore
             "expired_at" => $expired_at,
         );
 
-        if(!empty($cover)) {
+        if(!empty($image)) {
             //upload and update database.
             $offer['image'] = $image;
         }
