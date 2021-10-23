@@ -179,8 +179,8 @@ class Setting extends AppCore
         }
         foreach($allowed_row as $row_key){
             $new_val = $this->request->getVar($row_key);
-            if(empty($new_val)) {
-                $this->json_response(null, false, "Required field($row_key) cannot be empty.");
+            if(!isset($new_val) && $new_val != '') {
+                $this->json_response(null, false, "Required field($row_key)$new_val cannot be empty.");
             }
             $has_row_exist = $this->Crud_model->sql_get($this->table_name, 'opt_key, opt_val', "guard = '$group_name' AND opt_key = '$row_key'", null, 'row' );
             if($has_row_exist ) {
