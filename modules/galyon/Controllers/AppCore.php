@@ -373,4 +373,11 @@ class AppCore extends BaseController
     }
     return [];
   }
+
+  public function is_set($value) {
+    if(!isset($value) || $value == '') {
+      return false;
+    }
+    return true;
+  }
 }
