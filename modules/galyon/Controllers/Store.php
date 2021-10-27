@@ -7,8 +7,8 @@ use Galyon\Controllers\AppCore;
 class Store extends AppCore
 {
     private $table_name = 'stores';
-    private $edit_column = ['owner','city_id','name','descriptions','phone','email','cover','images','commission','open_time','close_time','isClosed','is_featured','status','timestamp'];
-    private $public_column = ['uuid','owner','city_id','name','descriptions','phone','email','cover','images','commission','open_time','close_time','isClosed','is_featured','pending_update','status','timestamp','updated_at','deleted_at'];
+    private $edit_column = ['owner','city_id','name','descriptions','phone','email','cover','images','commission','open_time','close_time','isClosed','is_featured','vcode','lazada','shopee','status','timestamp'];
+    private $public_column = ['uuid','owner','city_id','name','descriptions','phone','email','cover','images','commission','open_time','close_time','isClosed','is_featured','pending_update','vcode','lazada','shopee','status','timestamp','updated_at','deleted_at'];
     private $required = ['uuid'];
 
     function __construct(){
@@ -369,9 +369,10 @@ class Store extends AppCore
             $this->public_column, 
             "uuid = '$store_id'", 
             null, 'row' );
-        $changes = array_diff($_POST, (array)$previous);
+        $updates = (array)$previous;
+        $changes = array_diff($_POST, $updates);
 
-        if(!$changes) {
+        if(!$changes && $_POST['vcode'] == $updates['vcode'] && $_POST['lazada'] == $updates['lazada'] && $_POST['shopee'] == $updates['shopee']) {
             $this->json_response(null, false, "No changes was found"); 
         }
 
