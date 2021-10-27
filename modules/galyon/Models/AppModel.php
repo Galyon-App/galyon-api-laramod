@@ -92,11 +92,7 @@ class AppModel extends Model
 	public function sql_insert($table, $values) {
 		$this->db = $this->mysql->table($table);
 		$this->db->insert($values);
-		if($this->db->affectedRows() == '1') {
-			return $this->db->insert_id();
-		} else {
-			return false;
-		}
+		return $this->mysql->insertID();
 	}
 	
 	/**
