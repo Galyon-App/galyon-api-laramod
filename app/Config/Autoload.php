@@ -42,8 +42,7 @@ class Autoload extends AutoloadConfig
      */
     public $psr4 = [
         APP_NAMESPACE => APPPATH, // For custom app namespace
-        'Config'      => APPPATH . 'Config',
-        'Galyon'      => ROOTPATH . 'modules/galyon'
+        'Config'      => APPPATH . 'Config'
     ];
 
     /**
@@ -85,4 +84,23 @@ class Autoload extends AutoloadConfig
      * @var array<int, string>
      */
     public $files = [];
+
+    /**
+     * -------------------------------------------------------------------
+     * Constructor
+     * -------------------------------------------------------------------
+     */
+    function __construct() {
+        parent::__construct();
+
+        //Added autoloader for modules in the root directory.
+        $path = ROOTPATH . "modules";
+        if (file_exists($path)) {
+            $modules = array_filter(glob($path.'/*'), 'is_dir');
+            foreach($modules as $module) {
+                $name = substr($module, strrpos($module, '/') + 1);
+                $this->psr4[$name] = ROOTPATH . 'modules/' . $name;
+            }
+        }
+    }
 }
