@@ -1707,3 +1707,5 @@ $lang["template"] = "Template";
 $lang["template_details"] = "Template details";
 
 $lang["label_existing_error_message"] = "This label already in use. It can't be deleted.";
+
+return $lang;
