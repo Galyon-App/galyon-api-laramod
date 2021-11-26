@@ -341,10 +341,11 @@ class Product extends AppCore
         if($auth->role == "operator") {
             //TODO: Add check if operator and this product belongs to this operation.
         } else if($auth->role == "store") {
-            $is_store_owner = $this->is_owner_of_store($auth->uuid, $store_id);
+            $is_store_owner = $this->is_owner_of_store($auth->uuid, $request->data['store_id']);
             if(!$is_store_owner) {
                 $this->json_response(null, false, "You do not owned this store!"); 
             }
+
             $request->data['status'] = "0";
         }
 
@@ -410,14 +411,18 @@ class Product extends AppCore
                 $this->json_response(null, false, "You do not owned this product!"); 
             }
 
-            $is_store_owner = $this->is_owner_of_store($auth->uuid, $store_id);
+            $is_store_owner = $this->is_owner_of_store($auth->uuid, $request->data['store_id']);
             if(!$is_store_owner) {
                 $this->json_response(null, false, "You do not owned this store!"); 
             }
 
-            $previous = $this->Crud_model->sql_get($this->table_name, ["pending_update"], "uuid = '$product_id' AND pending_update IS NOT NULL", null, 'row' );
+            $previous = $this->Crud_model->sql_get($this->table_name, ["pending_update"], "uuid = '$product_id' ", null, 'row' );
             if($previous) {
                 $changes = array_merge((array)unserialize($previous->pending_update), $changes);
+            }
+
+            if($previous->pending_update) {
+                $this->json_response(null, false, "Pending updates is currently for review!");
             }
             
             //TODO: Decide whether to let store update while pending.
