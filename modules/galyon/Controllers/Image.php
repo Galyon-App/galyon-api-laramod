@@ -33,9 +33,11 @@ class Image extends AppCore
 
     public function render($imageName)
     {
-        if(($image = file_get_contents(WRITEPATH.'uploads/'.$imageName)) === FALSE)
-            show_404();
+        if( !$imageName ) {
+            exit;
+        }
 
+        $image = file_get_contents(WRITEPATH.'uploads/'.$imageName);
         $type = explode(".", $imageName);
         $mimeType = "image/".$type[1];
 
