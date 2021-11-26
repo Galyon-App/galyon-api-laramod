@@ -40,6 +40,12 @@ $routes->group('galyon', ['namespace' => 'Galyon\Controllers'], function ($route
 
 $routes->group('galyon', ['namespace' => 'Galyon\Controllers'], function ($routes) {
     $routes->group('v1', ['namespace' => 'Galyon\Controllers'], function ($routes) {
+        $routes->match(['get', 'post'], 'dashboard/(:any)', 'Dashboard::$1');
+    });
+});
+
+$routes->group('galyon', ['namespace' => 'Galyon\Controllers'], function ($routes) {
+    $routes->group('v1', ['namespace' => 'Galyon\Controllers'], function ($routes) {
         $routes->match(['get', 'post'], 'offers/(:any)', 'Offer::$1');
     });
 });
