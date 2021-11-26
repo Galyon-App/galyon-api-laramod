@@ -76,6 +76,7 @@ class Order extends AppCore
         foreach($orders as $order) {
             $order = $this->getOrderMetaItem($order);
         }
+        return $orders;
     }
 
     public function getOrdersById() {
@@ -128,14 +129,13 @@ class Order extends AppCore
 
     public function getOrdersRecently() {
         $auth = $this->is_authorized(true);
-        $request = $this->request_validation($_POST, [], $this->public_column,["store_id"]);
 
         //TODO: Check if Admin or Operator.
+        $owner_id = $auth->role == "store" ? "AND users.uuid = '$auth->uuid'":"";
 
-        $orders = $this->Crud_model->sql_get($this->table_name, $this->public_column, 
-            $this->compileWhereClause($auth->where, $request->where, true), NULL, 'result', null, ["timestamp","ASC"]);
+        $orders = $this->Crud_model->sql_custom("SELECT orders.* FROM orders INNER JOIN stores ON orders.store_id = stores.uuid LEFT JOIN users ON users.uuid = stores.owner WHERE orders.status = '1' AND orders.deleted_at IS NULL AND stores.status = '1' AND stores.deleted_at IS NULL $owner_id", array(), "results" );
         if($orders) {
-            $stoordersres = $this->getOrderMeta($orders);
+            $orders = $this->getOrderMeta($orders);
             $this->json_response($orders);
         } else {
             $this->json_response(null, false, "No orders was found!");
