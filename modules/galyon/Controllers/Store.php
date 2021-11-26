@@ -76,6 +76,7 @@ class Store extends AppCore
 
         $filter_term = $this->request->getVar('filter_term');
         $city_id = $this->request->getVar('city_id');
+        $owner_id = $this->request->getVar('owner_id');
         $limit_start = (int)$this->request->getVar('limit_start');
         $limit_length = (int)$this->request->getVar('limit_length');
         $limit_length = $limit_length ? $limit_length : 10;
@@ -106,8 +107,11 @@ class Store extends AppCore
         }
         $query .= " FROM `stores` ";
         $query .= " WHERE deleted_at IS NULL ";
+        if($auth->role == "store" && $owner_id) {
+            $query .= " AND owner = '$owner_id'";
+        }
         $query .= empty($city_id) ? "" : " AND `city_id` = ? ";
-        $query .= $auth->role == "user" || $auth->role == "store" ? " AND `status`='1' AND deleted_at IS NULL":"";
+        $query .= $auth->role == "user" ? " AND `status`='1' AND deleted_at IS NULL":"";
         $query .= empty($filter_term) ? "" : " AND name LIKE '%".$filter_term."%' ";
         $query .= count($order_by) == 2 ? " ORDER BY $order_by[0] $order_by[1]" : "";
         $query .= " LIMIT ?, ?";   
@@ -267,11 +271,19 @@ class Store extends AppCore
     }
 
     public function activate() {
-        $auth = $this->is_authorized(true, ["admin"]);
+        $auth = $this->is_authorized(true, ["admin", "store"]);
 
         $store_id = $this->request->getVar('uuid');
         if(empty($store_id)) {
             $this->json_response(null, false, "Required fields cannot be empty!");
+        }
+
+        if($auth->role == "store") {
+            if( $store = $this->Crud_model->sql_custom("SELECT * FROM stores WHERE uuid = '$store_id'") ) {
+                if($store->owner != $auth->uuid) {
+                    $this->json_response(null, false, "You are not an owner of the store!");
+                }
+            }
         }
 
         $updated = $this->Crud_model->sql_update($this->table_name, array( "status" => "1" ), "uuid = '$store_id'");
@@ -285,11 +297,19 @@ class Store extends AppCore
     }
 
     public function deactivate() {
-        $auth = $this->is_authorized(true, ["admin"]);
+        $auth = $this->is_authorized(true, ["admin", "store"]);
 
         $store_id = $this->request->getVar('uuid');
         if(empty($store_id)) {
             $this->json_response(null, false, "Required fields cannot be empty!");
+        }
+
+        if($auth->role == "store") {
+            if( $store = $this->Crud_model->sql_custom("SELECT * FROM stores WHERE uuid = '$store_id'") ) {
+                if($store->owner != $auth->uuid) {
+                    $this->json_response(null, false, "You are not an owner of the store!");
+                }
+            }
         }
 
         $updated = $this->Crud_model->sql_update($this->table_name, array( "status" => "0" ), "uuid = '$store_id' AND status = '1'");
@@ -339,7 +359,7 @@ class Store extends AppCore
     }
 
     public function createNewStore() {
-        $auth = $this->is_authorized(true, ["admin","operator"]);
+        $auth = $this->is_authorized(true, ["admin","operator","store"]);
         $request = $this->request_validation($_POST, ["name", "open_time", "close_time"], $this->edit_column);
         $request->data = array_merge(array(
             "uuid" => $this->uuid->v4(),
@@ -348,6 +368,10 @@ class Store extends AppCore
         
         if($auth->role == "operator") {
             //TODO: Add check if operator and this product belongs to this operation.
+        }
+
+        if($auth->role == "operator") {
+            $request->data->owner = $auth->uuid;
         }
 
         $inserted = $this->Crud_model->sql_insert($this->table_name, $request->data);
@@ -381,7 +405,11 @@ class Store extends AppCore
         } else if($auth->role == "store") {
             $is_owner = $this->is_owner_of_store($auth->uuid, $request->data['uuid']);
             if(!$is_owner) {
-                $this->json_response(null, false, "You are not authorized for this actions!"); 
+                $this->json_response($previous, false, "You are not authorized for this actions!"); 
+            }
+
+            if($previous->pending_update) {
+                $this->json_response(null, false, "Pending updates is currently for review!");
             }
 
             $update = $this->Crud_model->sql_update(
